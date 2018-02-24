@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,22 +16,23 @@ func ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func postBase64Image(w http.ResponseWriter, r *http.Request) {
-	// w.Write([]byte("pong"))
-	r.ParseForm()
-	var data = r.Form["frame_0"][0]
+	var canvas = r.FormValue("canvas")
+	var filename = r.FormValue("filename")
 	// // The actual image starts after the ","
-	i := strings.Index(data, ",")
+	i := strings.Index(canvas, ",")
 	if i < 0 {
 		log.Fatal("no comma")
 	}
-	dec, err := base64.StdEncoding.DecodeString(data[i+1:])
+	dec, err := base64.StdEncoding.DecodeString(canvas[i+1:])
 	if err != nil {
 		panic(err)
 	}
 
-	// os.MkdirAll("/output/", os.FileMode(0755))
+	os.MkdirAll("/output/", os.FileMode(0755))
 
-	f, err := os.Create("output/frame_0.png")
+	s := fmt.Sprintf("output/%s", filename)
+
+	f, err := os.Create(s)
 	defer f.Close()
 	if _, err := f.Write(dec); err != nil {
 		panic(err)
@@ -38,7 +40,10 @@ func postBase64Image(w http.ResponseWriter, r *http.Request) {
 	if err := f.Sync(); err != nil {
 		panic(err)
 	}
-	w.Write([]byte("Image Received"))
+
+	success := fmt.Sprintf("%s saved.", filename)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte(success))
 	// Return image in response
 	// pass reader to NewDecoder
 	// dec := base64.NewDecoder(base64.StdEncoding, strings.NewReader(data[i+1:]))
