@@ -1,3 +1,5 @@
+let saveCanvas = true;
+
 let randomString = Math.random().toString(36).substring(7);
 
 function setup() {
@@ -15,7 +17,9 @@ function draw() {
   background(255);
   textSize(15)
   text(frameCount, width/2, height/2);
-  sendCanvas(canvas);
+  if (saveCanvas) {
+    sendCanvas(canvas);
+  }
   if (frameCount % 25 == 0) {
     console.log(`fc: ${frameCount} fr: ${frameRate()}`)
   }
