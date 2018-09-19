@@ -53,9 +53,11 @@ func postBase64Image(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := mux.NewRouter()
-	r.Handle("/", http.FileServer(http.Dir(".")))
 	r.HandleFunc("/image", postBase64Image)
 	r.HandleFunc("/ping", ping)
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(".")))
+
+	fmt.Println("Running...")
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		panic(err)
 	}
